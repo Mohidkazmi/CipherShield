@@ -1,0 +1,22 @@
+# Environments
+venv/
+env/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac OS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+
+# Test / Output files
+*.enc
+*.dec
+*.restored
+test.txt
