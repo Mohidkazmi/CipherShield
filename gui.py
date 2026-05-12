@@ -3,8 +3,9 @@ from tkinter import ttk, filedialog, messagebox
 import os
 import threading
 import math
+import mfa_vault
 
-from encrypt import encrypt_file, decrypt_file
+from encrypt import encrypt_file, decrypt_file, generate_key_file, encrypt_file_with_key, decrypt_file_with_key
 from hashing import hash_sha256, hash_md5, hash_file_sha256
 from ciphers import caesar_encrypt, caesar_decrypt, vigenere_encrypt, vigenere_decrypt
 from utils import check_password_strength, copy_to_clipboard, shorten_path, get_file_size_str
@@ -342,19 +343,30 @@ class CipherShieldApp:
         GlowButton(body, "  BROWSE  ", self._enc_browse,
                    width=110, height=32, bg_col=PANEL2, text_col=ACCENT).pack(side="right")
 
-        # ── Password card ──
-        pc = SectionCard(inner, title="Password", accent=ACCENT2)
+        # ── Auth card ──
+        pc = SectionCard(inner, title="Authentication (Password or Key File)", accent=ACCENT2)
         pc.pack(fill="x", pady=(0, 14))
         pbody = tk.Frame(pc, bg=PANEL)
         pbody.pack(fill="x", padx=16, pady=(8, 6))
 
-        tk.Label(pbody, text="Enter password:", bg=PANEL, fg=FG2, font=FONT_SMALL).pack(anchor="w")
-        self.entry_enc_pwd = CyberEntry(pbody, show="●", width=50)
+        # Mode selector
+        self.auth_mode_var = tk.StringVar(value="password")
+        mode_frame = tk.Frame(pbody, bg=PANEL)
+        mode_frame.pack(fill="x", pady=(0, 10))
+        tk.Radiobutton(mode_frame, text="Use Password", variable=self.auth_mode_var, value="password", bg=PANEL, fg=FG, selectcolor=ACCENT, activebackground=PANEL, activeforeground=FG, command=self._toggle_auth, indicatoron=1).pack(side="left", padx=(0, 20))
+        tk.Radiobutton(mode_frame, text="Use Key File", variable=self.auth_mode_var, value="key", bg=PANEL, fg=FG, selectcolor=ACCENT, activebackground=PANEL, activeforeground=FG, command=self._toggle_auth, indicatoron=1).pack(side="left", padx=(0, 20))
+        tk.Radiobutton(mode_frame, text="Use MFA Vault", variable=self.auth_mode_var, value="mfa", bg=PANEL, fg=FG, selectcolor=ACCENT, activebackground=PANEL, activeforeground=FG, command=self._toggle_auth, indicatoron=1).pack(side="left")
+
+        # --- Password Section ---
+        self.pwd_frame = tk.Frame(pbody, bg=PANEL)
+        self.pwd_frame.pack(fill="x")
+        tk.Label(self.pwd_frame, text="Enter password:", bg=PANEL, fg=FG2, font=FONT_SMALL).pack(anchor="w")
+        self.entry_enc_pwd = CyberEntry(self.pwd_frame, show="●", width=50)
         self.entry_enc_pwd.pack(fill="x", pady=(4, 8))
         self.entry_enc_pwd.bind("<KeyRelease>", self._enc_pwd_strength)
 
         # Strength bar
-        sb_frame = tk.Frame(pbody, bg=PANEL)
+        sb_frame = tk.Frame(self.pwd_frame, bg=PANEL)
         sb_frame.pack(fill="x", pady=(0, 10))
         tk.Label(sb_frame, text="Strength:", bg=PANEL, fg=FG2, font=FONT_SMALL).pack(side="left")
         self._strength_bars = []
@@ -367,6 +379,28 @@ class CipherShieldApp:
             self._strength_bars.append(b)
         self.lbl_strength_txt = tk.Label(sb_frame, text="", bg=PANEL, fg=FG2, font=FONT_SMALL)
         self.lbl_strength_txt.pack(side="left", padx=8)
+
+        # --- Key File Section ---
+        self.key_frame = tk.Frame(pbody, bg=PANEL)
+        self.key_file_path = None
+        self.lbl_key_file = tk.Label(self.key_frame, text="No key file selected", bg=PANEL, fg=FG2, font=FONT_SMALL, anchor="w")
+        self.lbl_key_file.pack(side="left", fill="x", expand=True)
+        GlowButton(self.key_frame, " BROWSE KEY ", self._key_browse, width=120, height=32, bg_col=PANEL2, text_col=ACCENT).pack(side="right", padx=(10, 0))
+        GlowButton(self.key_frame, " GENERATE NEW KEY ", self._key_generate, width=170, height=32, bg_col=SUCCESS, text_col=BG).pack(side="right")
+        
+        # --- MFA Section ---
+        self.mfa_frame = tk.Frame(pbody, bg=PANEL)
+        self.lbl_mfa_status = tk.Label(self.mfa_frame, text="Vault Configured - Ready" if mfa_vault.is_vault_configured() else "Vault Not Configured - Click Setup", bg=PANEL, fg=SUCCESS if mfa_vault.is_vault_configured() else ERROR, font=FONT_SMALL)
+        self.lbl_mfa_status.pack(side="top", anchor="w", pady=(0, 8))
+        
+        mfa_input_frame = tk.Frame(self.mfa_frame, bg=PANEL)
+        mfa_input_frame.pack(fill="x")
+        tk.Label(mfa_input_frame, text="6-Digit MFA Code:", bg=PANEL, fg=FG2, font=FONT_SMALL).pack(side="left")
+        self.entry_mfa_code = CyberEntry(mfa_input_frame, width=15)
+        self.entry_mfa_code.pack(side="left", padx=10)
+        GlowButton(mfa_input_frame, " SETUP MFA VAULT ", self._open_mfa_setup, width=160, height=32, bg_col=ACCENT2, text_col=BG).pack(side="right")
+
+        self._toggle_auth()
 
         # ── Action card ──
         ac = SectionCard(inner, title="Actions", accent=CYAN)
@@ -390,6 +424,82 @@ class CipherShieldApp:
             self.lbl_enc_file.configure(
                 text=f"{shorten_path(p)}   ({get_file_size_str(p)})", fg=FG)
 
+    def _toggle_auth(self):
+        self.pwd_frame.pack_forget()
+        self.key_frame.pack_forget()
+        self.mfa_frame.pack_forget()
+        mode = self.auth_mode_var.get()
+        if mode == "password":
+            self.pwd_frame.pack(fill="x")
+        elif mode == "key":
+            self.key_frame.pack(fill="x", pady=(4,8))
+        elif mode == "mfa":
+            self.mfa_frame.pack(fill="x", pady=(4,8))
+            cfg = mfa_vault.is_vault_configured()
+            self.lbl_mfa_status.configure(text="Vault Configured - Ready" if cfg else "Vault Not Configured - Click Setup", fg=SUCCESS if cfg else ERROR)
+
+    def _key_browse(self):
+        p = filedialog.askopenfilename(filetypes=[("Key Files", "*.key"), ("All Files", "*.*")])
+        if p:
+            self.key_file_path = p
+            self.lbl_key_file.configure(text=shorten_path(p), fg=FG)
+
+    def _key_generate(self):
+        p = filedialog.asksaveasfilename(defaultextension=".key", filetypes=[("Key Files", "*.key")], initialfile="my_secret.key")
+        if p:
+            if generate_key_file(p):
+                self.key_file_path = p
+                self.lbl_key_file.configure(text=shorten_path(p), fg=FG)
+                messagebox.showinfo("Success", "Cryptographic Key successfully generated and saved!\n\nYou can now use this key file instead of a password.")
+            else:
+                messagebox.showerror("Error", "Failed to generate key file.")
+
+    def _open_mfa_setup(self):
+        top = tk.Toplevel(self.root)
+        top.title("MFA Vault Setup")
+        top.geometry("450x550")
+        top.configure(bg=BG)
+        top.transient(self.root)
+        top.grab_set()
+        
+        tk.Label(top, text="Google Authenticator Setup", bg=BG, fg=FG, font=FONT_TITLE).pack(pady=10)
+        tk.Label(top, text="1. Install Google Authenticator or Authy on your phone\n2. Scan the QR code below", bg=BG, fg=FG2).pack()
+        
+        seed = mfa_vault.generate_mfa_seed()
+        uri = mfa_vault.get_provisioning_uri(seed)
+        qr_path = "temp_qr.png"
+        mfa_vault.generate_qr_code(uri, qr_path)
+        
+        try:
+            from PIL import Image, ImageTk
+            img = Image.open(qr_path)
+            img = img.resize((200, 200))
+            photo = ImageTk.PhotoImage(img)
+            lbl_qr = tk.Label(top, image=photo, bg=BG)
+            lbl_qr.image = photo
+            lbl_qr.pack(pady=15)
+        except Exception:
+            tk.Label(top, text="[QR Image Error: run `pip install pillow qrcode`]", fg=ERROR, bg=BG).pack(pady=15)
+            
+        tk.Label(top, text=f"Or enter code manually: {seed}", bg=BG, fg=FG2, font=("Courier", 10)).pack()
+        tk.Label(top, text="3. Enter the 6-digit code to verify:", bg=BG, fg=FG).pack(pady=(15, 5))
+        
+        verify_entry = CyberEntry(top, width=15)
+        verify_entry.pack()
+        
+        def do_verify():
+            code = verify_entry.get().strip()
+            ok, msg = mfa_vault.setup_vault(seed, code)
+            if ok:
+                messagebox.showinfo("Success", "MFA Vault configured successfully!", parent=top)
+                if os.path.exists(qr_path): os.remove(qr_path)
+                self._toggle_auth()
+                top.destroy()
+            else:
+                messagebox.showerror("Error", msg, parent=top)
+                
+        GlowButton(top, " VERIFY & SAVE ", do_verify, width=150, height=35, bg_col=SUCCESS, text_col=BG).pack(pady=20)
+
     def _enc_pwd_strength(self, _=None):
         pwd = self.entry_enc_pwd.get()
         if not pwd:
@@ -406,26 +516,66 @@ class CipherShieldApp:
     def _enc_action_encrypt(self):
         if not self.enc_file:
             return messagebox.showwarning("No file", "Please select a file first.")
-        pwd = self.entry_enc_pwd.get()
-        if not pwd:
-            return messagebox.showwarning("No password", "Please enter a password.")
-        self.enc_status.info("Encrypting… please wait")
-        def task():
-            ok, msg = encrypt_file(self.enc_file, pwd)
-            self.root.after(0, self._enc_done, ok, msg, "encrypt")
-        threading.Thread(target=task, daemon=True).start()
+        
+        mode = self.auth_mode_var.get()
+        if mode == "password":
+            pwd = self.entry_enc_pwd.get()
+            if not pwd:
+                return messagebox.showwarning("No password", "Please enter a password.")
+            self.enc_status.info("Encrypting with Password… please wait")
+            def task():
+                ok, msg = encrypt_file(self.enc_file, pwd)
+                self.root.after(0, self._enc_done, ok, msg, "encrypt")
+            threading.Thread(target=task, daemon=True).start()
+        elif mode == "key":
+            if not self.key_file_path:
+                return messagebox.showwarning("No Key", "Please select or generate a Key File.")
+            self.enc_status.info("Encrypting with Key File… please wait")
+            def task():
+                ok, msg = encrypt_file_with_key(self.enc_file, self.key_file_path)
+                self.root.after(0, self._enc_done, ok, msg, "encrypt")
+            threading.Thread(target=task, daemon=True).start()
+        elif mode == "mfa":
+            code = self.entry_mfa_code.get().strip()
+            if not code or len(code) != 6:
+                return messagebox.showwarning("Invalid Code", "Please enter a 6-digit MFA code.")
+            self.enc_status.info("Unlocking Vault & Encrypting… please wait")
+            def task():
+                ok, msg = mfa_vault.encrypt_with_vault(self.enc_file, code)
+                self.root.after(0, self._enc_done, ok, msg, "encrypt")
+            threading.Thread(target=task, daemon=True).start()
 
     def _enc_action_decrypt(self):
         if not self.enc_file:
             return messagebox.showwarning("No file", "Please select a file first.")
-        pwd = self.entry_enc_pwd.get()
-        if not pwd:
-            return messagebox.showwarning("No password", "Please enter a password.")
-        self.enc_status.info("Decrypting… please wait")
-        def task():
-            ok, msg = decrypt_file(self.enc_file, pwd)
-            self.root.after(0, self._enc_done, ok, msg, "decrypt")
-        threading.Thread(target=task, daemon=True).start()
+            
+        mode = self.auth_mode_var.get()
+        if mode == "password":
+            pwd = self.entry_enc_pwd.get()
+            if not pwd:
+                return messagebox.showwarning("No password", "Please enter a password.")
+            self.enc_status.info("Decrypting with Password… please wait")
+            def task():
+                ok, msg = decrypt_file(self.enc_file, pwd)
+                self.root.after(0, self._enc_done, ok, msg, "decrypt")
+            threading.Thread(target=task, daemon=True).start()
+        elif mode == "key":
+            if not self.key_file_path:
+                return messagebox.showwarning("No Key", "Please select a Key File.")
+            self.enc_status.info("Decrypting with Key File… please wait")
+            def task():
+                ok, msg = decrypt_file_with_key(self.enc_file, self.key_file_path)
+                self.root.after(0, self._enc_done, ok, msg, "decrypt")
+            threading.Thread(target=task, daemon=True).start()
+        elif mode == "mfa":
+            code = self.entry_mfa_code.get().strip()
+            if not code or len(code) != 6:
+                return messagebox.showwarning("Invalid Code", "Please enter a 6-digit MFA code.")
+            self.enc_status.info("Unlocking Vault & Decrypting… please wait")
+            def task():
+                ok, msg = mfa_vault.decrypt_with_vault(self.enc_file, code)
+                self.root.after(0, self._enc_done, ok, msg, "decrypt")
+            threading.Thread(target=task, daemon=True).start()
 
     def _enc_done(self, ok, msg, op):
         if ok:
@@ -680,6 +830,23 @@ class CipherShieldApp:
         if not key:  messagebox.showwarning("Empty","Enter a key/shift."); return None,None
         return text, key
 
+    def _log_cipher_history(self, action, cipher_type, key, input_text, output_text):
+        """Logs cipher operations to a text file for educational demonstration."""
+        try:
+            import datetime
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            log_entry = (
+                f"[{timestamp}] {action} | {cipher_type} Cipher\n"
+                f"Key/Shift: {key}\n"
+                f"Input:  {input_text}\n"
+                f"Output: {output_text}\n"
+                f"{'-'*50}\n"
+            )
+            with open("cipher_history.txt", "a", encoding="utf-8") as f:
+                f.write(log_entry)
+        except Exception:
+            pass
+
     def _cipher_encrypt(self):
         text, key = self._get_cipher_io()
         if not text: return
@@ -691,6 +858,7 @@ class CipherShieldApp:
         self.txt_cipher_out.delete("1.0","end")
         self.txt_cipher_out.insert("end", r)
         self.cipher_status.ok("Encryption complete")
+        self._log_cipher_history("ENCRYPT", self.cipher_var.get(), key, text, r)
 
     def _cipher_decrypt(self):
         text, key = self._get_cipher_io()
@@ -703,6 +871,7 @@ class CipherShieldApp:
         self.txt_cipher_out.delete("1.0","end")
         self.txt_cipher_out.insert("end", r)
         self.cipher_status.ok("Decryption complete")
+        self._log_cipher_history("DECRYPT", self.cipher_var.get(), key, text, r)
 
     # ═══════════════════════════════════════════════════════════════════════
     #  TAB 5  –  ABOUT

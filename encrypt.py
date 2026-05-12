@@ -160,3 +160,84 @@ def decrypt_file(file_path: str, password: str) -> tuple[bool, str]:
         return False, "Error: Encrypted file not found."
     except Exception as e:
         return False, f"Decryption failed: {str(e)}"
+
+
+# ─── Key File Authentication (Alternative to Passwords) ─────────────────────────
+
+def generate_key_file(output_path: str) -> bool:
+    """
+    Generates a cryptographically secure 32-byte key and saves it to a file.
+    This eliminates the need for humans to remember passwords.
+    """
+    try:
+        key = Fernet.generate_key()
+        with open(output_path, 'wb') as f:
+            f.write(key)
+        return True
+    except Exception:
+        return False
+
+def encrypt_file_with_key(file_path: str, key_path: str) -> tuple[bool, str]:
+    """
+    Encrypts a file using a pre-generated key file.
+    Notice that we DO NOT need a salt here, because the key is already 
+    a perfectly random 32-byte string (unlike weak human passwords).
+    """
+    try:
+        with open(key_path, 'rb') as f:
+            key = f.read()
+            
+        fernet = Fernet(key)
+        
+        with open(file_path, 'rb') as f:
+            original_data = f.read()
+            
+        encrypted_data = fernet.encrypt(original_data)
+        
+        output_path = file_path + ".enc"
+        with open(output_path, 'wb') as f:
+            f.write(encrypted_data)
+            
+        return True, output_path
+
+    except FileNotFoundError:
+        return False, "Error: File or Key not found."
+    except ValueError:
+        return False, "Error: The selected key file is invalid."
+    except Exception as e:
+        return False, f"Encryption failed: {str(e)}"
+
+def decrypt_file_with_key(file_path: str, key_path: str) -> tuple[bool, str]:
+    """Decrypts a file using a pre-generated key file."""
+    try:
+        with open(key_path, 'rb') as f:
+            key = f.read()
+            
+        fernet = Fernet(key)
+        
+        with open(file_path, 'rb') as f:
+            encrypted_data = f.read()
+            
+        decrypted_data = fernet.decrypt(encrypted_data)
+        
+        if file_path.endswith(".enc"):
+            output_path = file_path[:-4]
+        else:
+            output_path = file_path + ".decrypted"
+            
+        if os.path.exists(output_path):
+            output_path = output_path + ".restored"
+            
+        with open(output_path, 'wb') as f:
+            f.write(decrypted_data)
+            
+        return True, output_path
+
+    except InvalidToken:
+        return False, "Error: Wrong key file! Decryption failed."
+    except FileNotFoundError:
+        return False, "Error: File or Key not found."
+    except ValueError:
+        return False, "Error: The selected key file is invalid."
+    except Exception as e:
+        return False, f"Decryption failed: {str(e)}"

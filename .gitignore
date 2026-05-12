@@ -20,3 +20,8 @@ __pycache__/
 *.dec
 *.restored
 test.txt
+cipher_history.txt
+
+# Keys and Secrets
+*.key
+mfa_vault.json
