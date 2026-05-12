@@ -21,6 +21,7 @@ __pycache__/
 *.restored
 test.txt
 cipher_history.txt
+temp_qr.png
 
 # Keys and Secrets
 *.key
