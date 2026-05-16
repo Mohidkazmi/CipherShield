@@ -23,25 +23,31 @@ from hashing import hash_sha256, hash_md5, hash_file_sha256
 from encrypt import encrypt_file, decrypt_file
 
 app = FastAPI(title="Hybrid Shield — Secure File Encryption System")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Static files & templates
-os.makedirs("static/css", exist_ok=True)
-os.makedirs("static/js", exist_ok=True)
-os.makedirs("templates", exist_ok=True)
-os.makedirs("uploads", exist_ok=True)
+# On Vercel, we can only write to /tmp
+if os.environ.get("VERCEL") == "1":
+    UPLOAD_DIR = "/tmp/uploads"
+else:
+    UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(os.path.join(UPLOAD_DIR, "keys"), exist_ok=True)
+
+# Static files & templates using absolute paths
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 
 # ─── Helper: save upload to temp file ──────────────────────────────────────────
 
-def _save_upload(upload: UploadFile, folder: str = "uploads") -> str:
+def _save_upload(upload: UploadFile, folder: str = UPLOAD_DIR) -> str:
     """Saves an uploaded file to disk and returns its path."""
     path = os.path.join(folder, upload.filename)
     with open(path, "wb") as f:
         shutil.copyfileobj(upload.file, f)
     return path
+
 
 
 # ─── Pages ─────────────────────────────────────────────────────────────────────
@@ -57,8 +63,9 @@ async def index(request: Request):
 async def api_generate_keys(label: str = Form("Default Key")):
     """Generates an RSA key pair and registers it in the Key Manager."""
     try:
-        folder = os.path.join("uploads", "keys")
+        folder = os.path.join(UPLOAD_DIR, "keys")
         os.makedirs(folder, exist_ok=True)
+
         priv_pem, pub_pem = hybrid_crypto.generate_rsa_keys()
         priv_path, pub_path = hybrid_crypto.save_keys(priv_pem, pub_pem, folder)
         entry = key_manager.add_key(label, priv_path, pub_path)
