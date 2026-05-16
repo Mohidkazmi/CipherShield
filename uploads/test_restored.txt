@@ -1,0 +1,4 @@
+my name is mohid kazim and i am a student of information security 
+im doing final year project on encryption and decryption of files 
+hoping for the best :)
+yup this is a test file for encryption and i hope it will work 

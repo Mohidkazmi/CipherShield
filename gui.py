@@ -9,6 +9,9 @@ from encrypt import encrypt_file, decrypt_file, generate_key_file, encrypt_file_
 from hashing import hash_sha256, hash_md5, hash_file_sha256
 from ciphers import caesar_encrypt, caesar_decrypt, vigenere_encrypt, vigenere_decrypt
 from utils import check_password_strength, copy_to_clipboard, shorten_path, get_file_size_str
+import digital_signature
+import key_manager
+import hybrid_crypto
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  DESIGN TOKENS
@@ -147,6 +150,9 @@ class CyberEntry(tk.Frame):
 # ══════════════════════════════════════════════════════════════════════════════
 
 NAV_ITEMS = [
+    ("☯", "Hybrid Crypto"),
+    ("✍", "Digital Signatures"),
+    ("🔑", "Key Manager"),
     ("⬡", "File Encryption"),
     ("◈", "Data Integrity"),
     ("⬢", "Hashing"),
@@ -278,6 +284,9 @@ class CipherShieldApp:
         # Build all tabs (hidden initially)
         self._tabs = []
         builders = [
+            self._build_hybrid_tab,
+            self._build_signature_tab,
+            self._build_key_manager_tab,
             self._build_encryption_tab,
             self._build_dataloss_tab,
             self._build_hashing_tab,
@@ -320,7 +329,379 @@ class CipherShieldApp:
         return w
 
     # ═══════════════════════════════════════════════════════════════════════
-    #  TAB 1  –  FILE ENCRYPTION
+    #  TAB 0  –  HYBRID CRYPTOGRAPHY
+    # ═══════════════════════════════════════════════════════════════════════
+
+    def _build_hybrid_tab(self, tab):
+        self._tab_header(tab, "☯", "Hybrid Cryptography System",
+                         "RSA-2048 (Asymmetric) + AES-256 GCM (Symmetric) for high-security file vaulting")
+
+        self.hybrid_file = None
+        self.pub_key_path = None
+        self.priv_key_path = None
+        
+        inner = tk.Frame(tab, bg=BG)
+        inner.pack(fill="both", expand=True, padx=36)
+
+        # ── Step 1: RSA Key Management ──
+        kc = SectionCard(inner, title="1. RSA Key Management", accent=ACCENT2)
+        kc.pack(fill="x", pady=(0, 14))
+        kbody = tk.Frame(kc, bg=PANEL)
+        kbody.pack(fill="x", padx=16, pady=(8, 16))
+        
+        tk.Label(kbody, text="To use hybrid encryption, you need an RSA Key Pair.\nThe Public Key encrypts, and the Private Key decrypts.",
+                 bg=PANEL, fg=FG2, font=FONT_SMALL, justify="left").pack(side="left")
+        
+        GlowButton(kbody, " GENERATE RSA PAIR ", self._hybrid_generate_keys,
+                   width=180, height=32, bg_col=SUCCESS, text_col=BG).pack(side="right")
+
+        # ── Step 2: Select Keys ──
+        skc = SectionCard(inner, title="2. Select Keys", accent=ACCENT)
+        skc.pack(fill="x", pady=(0, 14))
+        skbody = tk.Frame(skc, bg=PANEL)
+        skbody.pack(fill="x", padx=16, pady=(8, 16))
+
+        # Public Key Row
+        pub_row = tk.Frame(skbody, bg=PANEL)
+        pub_row.pack(fill="x", pady=(0, 8))
+        self.lbl_pub_key = tk.Label(pub_row, text="Public Key: No key loaded (Needed for Encryption)", 
+                                    bg=PANEL, fg=FG2, font=FONT_SMALL, anchor="w")
+        self.lbl_pub_key.pack(side="left", fill="x", expand=True)
+        GlowButton(pub_row, " LOAD PUBLIC ", self._hybrid_browse_public,
+                   width=120, height=30, bg_col=PANEL2, text_col=ACCENT).pack(side="right")
+
+        # Private Key Row
+        priv_row = tk.Frame(skbody, bg=PANEL)
+        priv_row.pack(fill="x")
+        self.lbl_priv_key = tk.Label(priv_row, text="Private Key: No key loaded (Needed for Decryption)", 
+                                     bg=PANEL, fg=FG2, font=FONT_SMALL, anchor="w")
+        self.lbl_priv_key.pack(side="left", fill="x", expand=True)
+        GlowButton(priv_row, " LOAD PRIVATE ", self._hybrid_browse_private,
+                   width=120, height=30, bg_col=PANEL2, text_col=ACCENT2).pack(side="right")
+
+        # ── Step 3: Target File ──
+        fc = SectionCard(inner, title="3. Select Target File", accent=CYAN)
+        fc.pack(fill="x", pady=(0, 14))
+        fbody = tk.Frame(fc, bg=PANEL)
+        fbody.pack(fill="x", padx=16, pady=(8, 16))
+
+        self.lbl_hyb_file = tk.Label(fbody, text="No file selected",
+                                     bg=PANEL, fg=FG2, font=FONT_SMALL, anchor="w")
+        self.lbl_hyb_file.pack(side="left", fill="x", expand=True)
+        GlowButton(fbody, "  BROWSE  ", self._hybrid_browse_file,
+                   width=110, height=32, bg_col=PANEL2, text_col=CYAN).pack(side="right")
+
+        # ── Actions ──
+        ac = SectionCard(inner, title="Actions", accent=ACCENT)
+        ac.pack(fill="x", pady=(0, 14))
+        abody = tk.Frame(ac, bg=PANEL)
+        abody.pack(fill="x", padx=16, pady=(8, 16))
+
+        GlowButton(abody, "  🔒  HYBRID ENCRYPT  ", self._hybrid_action_encrypt,
+                   width=190, height=38, bg_col=ACCENT).pack(side="left", padx=(0, 12))
+        GlowButton(abody, "  🔓  HYBRID DECRYPT  ", self._hybrid_action_decrypt,
+                   width=190, height=38, bg_col="#3a3d6b", text_col=CYAN).pack(side="left")
+
+        # ── Status ──
+        self.hyb_status = StatusBar(inner)
+        self.hyb_status.pack(fill="x", pady=(4, 0))
+
+    def _hybrid_browse_file(self):
+        p = filedialog.askopenfilename()
+        if p:
+            self.hybrid_file = p
+            self.lbl_hyb_file.configure(text=f"{shorten_path(p)}   ({get_file_size_str(p)})", fg=FG)
+
+    def _hybrid_browse_public(self):
+        p = filedialog.askopenfilename(filetypes=[("PEM Files", "*.pem"), ("All Files", "*.*")])
+        if p:
+            self.pub_key_path = p
+            self.lbl_pub_key.configure(text=f"Public Key: {shorten_path(p)}", fg=SUCCESS)
+
+    def _hybrid_browse_private(self):
+        p = filedialog.askopenfilename(filetypes=[("PEM Files", "*.pem"), ("All Files", "*.*")])
+        if p:
+            self.priv_key_path = p
+            self.lbl_priv_key.configure(text=f"Private Key: {shorten_path(p)}", fg=SUCCESS)
+
+    def _hybrid_generate_keys(self):
+        folder = filedialog.askdirectory(title="Select Folder to Save RSA Keys")
+        if folder:
+            try:
+                priv, pub = hybrid_crypto.generate_rsa_keys()
+                priv_p, pub_p = hybrid_crypto.save_keys(priv, pub, folder)
+                self.pub_key_path = pub_p
+                self.priv_key_path = priv_p
+                self.lbl_pub_key.configure(text=f"Public Key: {shorten_path(pub_p)}", fg=SUCCESS)
+                self.lbl_priv_key.configure(text=f"Private Key: {shorten_path(priv_p)}", fg=SUCCESS)
+                messagebox.showinfo("Keys Generated", f"RSA Key Pair successfully generated!\n\nPrivate: {priv_p}\nPublic: {pub_p}\n\nKEEP YOUR PRIVATE KEY SAFE!")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to generate keys: {e}")
+
+    def _hybrid_action_encrypt(self):
+        if not self.hybrid_file: return messagebox.showwarning("No File", "Select a file to encrypt.")
+        if not self.pub_key_path: return messagebox.showwarning("No Public Key", "Select a Public Key to encrypt the session key.")
+        
+        self.hyb_status.info("Performing Hybrid Encryption...")
+        def task():
+            ok, msg = hybrid_crypto.hybrid_encrypt(self.hybrid_file, self.pub_key_path)
+            self.root.after(0, self._hybrid_done, ok, msg, "encrypt")
+        threading.Thread(target=task, daemon=True).start()
+
+    def _hybrid_action_decrypt(self):
+        if not self.hybrid_file: return messagebox.showwarning("No File", "Select a .hyb file to decrypt.")
+        if not self.priv_key_path: return messagebox.showwarning("No Private Key", "Select your Private Key to decrypt the session key.")
+        
+        self.hyb_status.info("Performing Hybrid Decryption...")
+        def task():
+            ok, msg = hybrid_crypto.hybrid_decrypt(self.hybrid_file, self.priv_key_path)
+            self.root.after(0, self._hybrid_done, ok, msg, "decrypt")
+        threading.Thread(target=task, daemon=True).start()
+
+    def _hybrid_done(self, ok, msg, op):
+        if ok:
+            self.hyb_status.ok(f"Hybrid {op} successful: {shorten_path(msg)}")
+            messagebox.showinfo("Success", f"Hybrid {op} completed!\n\nResult: {msg}")
+        else:
+            self.hyb_status.err(msg)
+            messagebox.showerror("Error", msg)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    #  TAB - DIGITAL SIGNATURES
+    # ═══════════════════════════════════════════════════════════════════════
+
+    def _build_signature_tab(self, tab):
+        self._tab_header(tab, "✍", "Digital Signatures",
+                         "Sign files to prove authenticity (RSA-PSS with SHA-256)")
+
+        self.sig_file = None
+        self.sig_key_path = None
+        self.sig_cert_path = None
+        
+        inner = tk.Frame(tab, bg=BG)
+        inner.pack(fill="both", expand=True, padx=36)
+
+        # ── Step 1: Target File ──
+        fc = SectionCard(inner, title="1. Select Target File", accent=ACCENT)
+        fc.pack(fill="x", pady=(0, 14))
+        fbody = tk.Frame(fc, bg=PANEL)
+        fbody.pack(fill="x", padx=16, pady=(8, 16))
+
+        self.lbl_sig_file = tk.Label(fbody, text="No file selected",
+                                     bg=PANEL, fg=FG2, font=FONT_SMALL, anchor="w")
+        self.lbl_sig_file.pack(side="left", fill="x", expand=True)
+        GlowButton(fbody, "  BROWSE  ", self._sig_browse_file,
+                   width=110, height=32, bg_col=PANEL2, text_col=ACCENT).pack(side="right")
+
+        # ── Step 2: Keys ──
+        kc = SectionCard(inner, title="2. Select Key", accent=ACCENT2)
+        kc.pack(fill="x", pady=(0, 14))
+        kbody = tk.Frame(kc, bg=PANEL)
+        kbody.pack(fill="x", padx=16, pady=(8, 16))
+
+        tk.Label(kbody, text="Signing requires your PRIVATE key. Verifying requires the signer's PUBLIC key.",
+                 bg=PANEL, fg=FG2, font=FONT_SMALL, justify="left").pack(anchor="w", pady=(0,8))
+                 
+        key_row = tk.Frame(kbody, bg=PANEL)
+        key_row.pack(fill="x")
+        self.lbl_sig_key = tk.Label(key_row, text="No key loaded", 
+                                    bg=PANEL, fg=FG2, font=FONT_SMALL, anchor="w")
+        self.lbl_sig_key.pack(side="left", fill="x", expand=True)
+        GlowButton(key_row, " LOAD KEY ", self._sig_browse_key,
+                   width=120, height=30, bg_col=PANEL2, text_col=ACCENT2).pack(side="right")
+
+        # ── Step 3: Signature File (Verify Only) ──
+        vc = SectionCard(inner, title="3. Select Signature File (Verify Only)", accent=CYAN)
+        vc.pack(fill="x", pady=(0, 14))
+        vbody = tk.Frame(vc, bg=PANEL)
+        vbody.pack(fill="x", padx=16, pady=(8, 16))
+        
+        self.lbl_sig_cert = tk.Label(vbody, text="Select the .sig file generated during signing",
+                                     bg=PANEL, fg=FG2, font=FONT_SMALL, anchor="w")
+        self.lbl_sig_cert.pack(side="left", fill="x", expand=True)
+        GlowButton(vbody, " BROWSE SIG ", self._sig_browse_cert,
+                   width=130, height=30, bg_col=PANEL2, text_col=CYAN).pack(side="right")
+
+        # ── Actions ──
+        ac = SectionCard(inner, title="Actions", accent=ACCENT)
+        ac.pack(fill="x", pady=(0, 14))
+        abody = tk.Frame(ac, bg=PANEL)
+        abody.pack(fill="x", padx=16, pady=(8, 16))
+
+        GlowButton(abody, "  ✍  SIGN FILE  ", self._sig_action_sign,
+                   width=180, height=38, bg_col=ACCENT).pack(side="left", padx=(0, 12))
+        GlowButton(abody, "  ✅  VERIFY SIG  ", self._sig_action_verify,
+                   width=180, height=38, bg_col="#3a3d6b", text_col=CYAN).pack(side="left")
+
+        # ── Status ──
+        self.sig_status = StatusBar(inner)
+        self.sig_status.pack(fill="x", pady=(4, 0))
+
+    def _sig_browse_file(self):
+        p = filedialog.askopenfilename()
+        if p:
+            self.sig_file = p
+            self.lbl_sig_file.configure(text=f"{shorten_path(p)}   ({get_file_size_str(p)})", fg=FG)
+
+    def _sig_browse_key(self):
+        p = filedialog.askopenfilename(filetypes=[("PEM Files", "*.pem"), ("All Files", "*.*")])
+        if p:
+            self.sig_key_path = p
+            self.lbl_sig_key.configure(text=f"Key: {shorten_path(p)}", fg=SUCCESS)
+
+    def _sig_browse_cert(self):
+        p = filedialog.askopenfilename(filetypes=[("Signature Files", "*.sig"), ("All Files", "*.*")])
+        if p:
+            self.sig_cert_path = p
+            self.lbl_sig_cert.configure(text=f"Signature: {shorten_path(p)}", fg=SUCCESS)
+
+    def _sig_action_sign(self):
+        if not self.sig_file: return messagebox.showwarning("No File", "Select a file to sign.")
+        if not self.sig_key_path: return messagebox.showwarning("No Key", "Select a Private Key to sign with.")
+        
+        self.sig_status.info("Generating RSA-PSS Signature...")
+        def task():
+            ok, msg = digital_signature.sign_file(self.sig_file, self.sig_key_path)
+            self.root.after(0, self._sig_done, ok, msg, "Sign")
+        threading.Thread(target=task, daemon=True).start()
+
+    def _sig_action_verify(self):
+        if not self.sig_file: return messagebox.showwarning("No File", "Select the original file.")
+        if not self.sig_cert_path: return messagebox.showwarning("No Signature", "Select the .sig signature file.")
+        if not self.sig_key_path: return messagebox.showwarning("No Key", "Select the signer's Public Key.")
+        
+        self.sig_status.info("Verifying Signature...")
+        def task():
+            ok, msg = digital_signature.verify_signature(self.sig_file, self.sig_cert_path, self.sig_key_path)
+            self.root.after(0, self._sig_done, ok, msg, "Verify")
+        threading.Thread(target=task, daemon=True).start()
+
+    def _sig_done(self, ok, msg, op):
+        if ok:
+            self.sig_status.ok(f"{op} successful: {shorten_path(msg) if op=='Sign' else msg}")
+            messagebox.showinfo("Success", f"{op} completed!\n\nResult: {msg}")
+        else:
+            self.sig_status.err(msg)
+            messagebox.showerror("Error", msg)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    #  TAB - KEY MANAGER
+    # ═══════════════════════════════════════════════════════════════════════
+
+    def _build_key_manager_tab(self, tab):
+        self._tab_header(tab, "🔑", "Key Manager",
+                         "Central registry for all RSA cryptographic keys")
+                         
+        inner = tk.Frame(tab, bg=BG)
+        inner.pack(fill="both", expand=True, padx=36)
+        
+        # ── Key Registry Table ──
+        rc = SectionCard(inner, title="Registered Keys", accent=CYAN)
+        rc.pack(fill="both", expand=True, pady=(0, 14))
+        rbody = tk.Frame(rc, bg=PANEL)
+        rbody.pack(fill="both", expand=True, padx=16, pady=(8, 16))
+        
+        # Treeview for keys
+        cols = ("ID", "Label", "Algorithm", "Bits", "Created")
+        self.key_tree = ttk.Treeview(rbody, columns=cols, show="headings", height=8)
+        
+        # Configure style
+        style = ttk.Style()
+        style.theme_use("default")
+        style.configure("Treeview", background=ENTRY_BG, foreground=FG, fieldbackground=ENTRY_BG, borderwidth=0, font=FONT_SMALL)
+        style.map("Treeview", background=[("selected", ACCENT)])
+        style.configure("Treeview.Heading", background=PANEL2, foreground=FG2, font=FONT_HEAD, borderwidth=1)
+        
+        self.key_tree.heading("ID", text="ID")
+        self.key_tree.heading("Label", text="Label")
+        self.key_tree.heading("Algorithm", text="Alg")
+        self.key_tree.heading("Bits", text="Bits")
+        self.key_tree.heading("Created", text="Created On")
+        
+        self.key_tree.column("ID", width=40, anchor="center")
+        self.key_tree.column("Label", width=200)
+        self.key_tree.column("Algorithm", width=80, anchor="center")
+        self.key_tree.column("Bits", width=80, anchor="center")
+        self.key_tree.column("Created", width=150, anchor="center")
+        
+        sb = tk.Scrollbar(rbody, orient="vertical", command=self.key_tree.yview, bg=PANEL2, troughcolor=PANEL2, relief="flat")
+        self.key_tree.configure(yscrollcommand=sb.set)
+        
+        sb.pack(side="right", fill="y")
+        self.key_tree.pack(side="left", fill="both", expand=True)
+        
+        # ── Actions ──
+        ac = SectionCard(inner, title="Key Actions", accent=ACCENT2)
+        ac.pack(fill="x", pady=(0, 14))
+        abody = tk.Frame(ac, bg=PANEL)
+        abody.pack(fill="x", padx=16, pady=(8, 16))
+        
+        GlowButton(abody, " ➕ GENERATE NEW KEY ", self._km_generate,
+                   width=200, height=35, bg_col=SUCCESS, text_col=BG).pack(side="left", padx=(0,10))
+        GlowButton(abody, " 🗑 DELETE SELECTED ", self._km_delete,
+                   width=200, height=35, bg_col=ERROR, text_col=BG).pack(side="left")
+                   
+        self._km_refresh()
+
+    def _km_refresh(self):
+        for item in self.key_tree.get_children():
+            self.key_tree.delete(item)
+        keys = key_manager.list_keys()
+        for k in keys:
+            self.key_tree.insert("", "end", values=(k["id"], k["label"], k["algorithm"], k["bits"], k["created_at"]))
+
+    def _km_generate(self):
+        # Mini dialog to ask for label and folder
+        top = tk.Toplevel(self.root)
+        top.title("Generate New Key")
+        top.geometry("400x250")
+        top.configure(bg=BG)
+        top.transient(self.root)
+        top.grab_set()
+        
+        tk.Label(top, text="Generate New RSA Key Pair", bg=BG, fg=FG, font=FONT_TITLE).pack(pady=10)
+        
+        lbl_frame = tk.Frame(top, bg=BG)
+        lbl_frame.pack(fill="x", padx=20, pady=10)
+        tk.Label(lbl_frame, text="Key Label:", bg=BG, fg=FG2).pack(side="left")
+        entry_lbl = CyberEntry(lbl_frame, width=30)
+        entry_lbl.pack(side="right")
+        
+        def do_gen():
+            label = entry_lbl.get().strip()
+            if not label: return messagebox.showwarning("Empty", "Provide a label for the key.", parent=top)
+            folder = filedialog.askdirectory(parent=top, title="Select folder to save PEM files")
+            if not folder: return
+            
+            try:
+                priv, pub = hybrid_crypto.generate_rsa_keys()
+                priv_path, pub_path = hybrid_crypto.save_keys(priv, pub, folder)
+                key_manager.add_key(label, priv_path, pub_path)
+                messagebox.showinfo("Success", f"Key '{label}' generated and registered!", parent=top)
+                self._km_refresh()
+                top.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to generate key: {e}", parent=top)
+                
+        GlowButton(top, " GENERATE ", do_gen, width=150, height=35, bg_col=SUCCESS, text_col=BG).pack(pady=15)
+
+    def _km_delete(self):
+        selected = self.key_tree.selection()
+        if not selected: return messagebox.showwarning("No Selection", "Select a key to delete.")
+        
+        item = self.key_tree.item(selected[0])
+        key_id = item["values"][0]
+        label = item["values"][1]
+        
+        if messagebox.askyesno("Confirm Delete", f"Remove '{label}' from registry?\n\nNote: This does not delete the actual PEM files from your disk."):
+            if key_manager.delete_key(key_id):
+                self._km_refresh()
+                messagebox.showinfo("Deleted", "Key removed from registry.")
+            else:
+                messagebox.showerror("Error", "Could not delete key.")
+
+    # ═══════════════════════════════════════════════════════════════════════
+    #  TAB - FILE ENCRYPTION
     # ═══════════════════════════════════════════════════════════════════════
 
     def _build_encryption_tab(self, tab):
@@ -931,3 +1312,14 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = CipherShieldApp(root)
     root.mainloop()
+
+
+
+
+
+
+
+
+
+
+    
