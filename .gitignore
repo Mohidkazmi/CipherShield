@@ -26,3 +26,8 @@ temp_qr.png
 # Keys and Secrets
 *.key
 mfa_vault.json
+keys_registry.json
+
+# Restructured Databases, Dynamic Files, & Local Caches
+data/
+uploads/

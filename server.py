@@ -11,10 +11,15 @@ import os
 import io
 import tempfile
 import shutil
+import sys
 from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
+# Add src folder to sys.path to load restructured modules
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(BASE_DIR, "src"))
 
 import hybrid_crypto
 import digital_signature

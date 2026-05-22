@@ -1,4 +1,8 @@
 import os
+import sys
+# Add src folder to sys.path to load restructured modules
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
+
 from hybrid_crypto import generate_rsa_keys, save_keys, hybrid_encrypt, hybrid_decrypt
 from digital_signature import sign_file, verify_signature
 

@@ -848,7 +848,8 @@ class CipherShieldApp:
         
         seed = mfa_vault.generate_mfa_seed()
         uri = mfa_vault.get_provisioning_uri(seed)
-        qr_path = "temp_qr.png"
+        os.makedirs("data", exist_ok=True)
+        qr_path = os.path.join("data", "temp_qr.png")
         mfa_vault.generate_qr_code(uri, qr_path)
         
         try:
@@ -1223,7 +1224,8 @@ class CipherShieldApp:
                 f"Output: {output_text}\n"
                 f"{'-'*50}\n"
             )
-            with open("cipher_history.txt", "a", encoding="utf-8") as f:
+            os.makedirs("data", exist_ok=True)
+            with open(os.path.join("data", "cipher_history.txt"), "a", encoding="utf-8") as f:
                 f.write(log_entry)
         except Exception:
             pass

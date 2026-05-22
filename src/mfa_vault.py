@@ -4,7 +4,11 @@ import pyotp
 import qrcode
 from cryptography.fernet import Fernet
 
-VAULT_FILE = "mfa_vault.json"
+if os.environ.get("VERCEL") == "1":
+    VAULT_FILE = "/tmp/mfa_vault.json"
+else:
+    os.makedirs("data", exist_ok=True)
+    VAULT_FILE = os.path.join("data", "mfa_vault.json")
 
 def generate_mfa_seed() -> str:
     """Generates a random Base32 seed for Google Authenticator."""

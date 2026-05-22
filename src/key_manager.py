@@ -14,11 +14,12 @@ import os
 import json
 import datetime
 
-# Use /tmp for the registry if running on Vercel, otherwise use local directory
+# Use /tmp for the registry if running on Vercel, otherwise use data/ directory
 if os.environ.get("VERCEL") == "1":
     REGISTRY_FILE = "/tmp/keys_registry.json"
 else:
-    REGISTRY_FILE = "keys_registry.json"
+    os.makedirs("data", exist_ok=True)
+    REGISTRY_FILE = os.path.join("data", "keys_registry.json")
 
 
 

@@ -7,6 +7,11 @@ Launches the FastAPI web server and opens the dashboard in your browser.
 import webbrowser
 import threading
 import uvicorn
+import sys
+import os
+
+# Add src folder to sys.path to load restructured modules
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
 
 def open_browser():
     """Opens the dashboard in the default browser after a short delay."""
