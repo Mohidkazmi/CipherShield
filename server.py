@@ -19,6 +19,8 @@ from fastapi.templating import Jinja2Templates
 import hybrid_crypto
 import digital_signature
 import key_manager
+import mfa_vault
+import ciphers
 from hashing import hash_sha256, hash_md5, hash_file_sha256
 from encrypt import encrypt_file, decrypt_file
 
@@ -238,3 +240,134 @@ async def api_aes_decrypt(file: UploadFile = File(...), password: str = Form(...
         return JSONResponse({"success": False, "message": result}, status_code=400)
     except Exception as e:
         return JSONResponse({"success": False, "message": str(e)}, status_code=500)
+
+
+# ─── MFA Vault Endpoints ────────────────────────────────────────────────────────
+
+@app.get("/api/mfa/status")
+async def api_mfa_status():
+    """Checks if the MFA Vault has been configured."""
+    return JSONResponse({"configured": mfa_vault.is_vault_configured()})
+
+
+@app.post("/api/mfa/reset")
+async def api_mfa_reset():
+    """Deletes the vault file so it can be re-configured."""
+    try:
+        import mfa_vault
+        if os.path.exists(mfa_vault.VAULT_FILE):
+            os.remove(mfa_vault.VAULT_FILE)
+        return JSONResponse({"success": True, "message": "Vault file deleted and reset."})
+    except Exception as e:
+        return JSONResponse({"success": False, "message": str(e)}, status_code=500)
+
+
+@app.post("/api/mfa/generate")
+async def api_mfa_generate(username: str = Form("User")):
+    """Generates an MFA seed and base64 encoded QR Code."""
+    try:
+        seed = mfa_vault.generate_mfa_seed()
+        uri = mfa_vault.get_provisioning_uri(seed, username)
+        
+        # Draw QR Code to base64
+        import qrcode
+        import base64
+        from io import BytesIO
+        qr = qrcode.make(uri)
+        buffered = BytesIO()
+        qr.save(buffered, format="PNG")
+        qr_b64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        
+        return JSONResponse({
+            "success": True,
+            "seed": seed,
+            "qr_code": qr_b64,
+            "uri": uri
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "message": str(e)}, status_code=500)
+
+
+@app.post("/api/mfa/setup")
+async def api_mfa_setup(seed: str = Form(...), code: str = Form(...)):
+    """Verifies the first OTP code and configures the vault."""
+    try:
+        ok, msg = mfa_vault.setup_vault(seed, code)
+        return JSONResponse({"success": ok, "message": msg})
+    except Exception as e:
+        return JSONResponse({"success": False, "message": str(e)}, status_code=500)
+
+
+@app.post("/api/mfa/encrypt")
+async def api_mfa_encrypt(file: UploadFile = File(...), code: str = Form(...)):
+    """Encrypts a file with the dynamic MFA vault master key."""
+    try:
+        file_path = _save_upload(file)
+        ok, result = mfa_vault.encrypt_with_vault(file_path, code)
+        
+        # Clean up original upload
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            
+        if ok:
+            return FileResponse(result, filename=os.path.basename(result),
+                                media_type="application/octet-stream")
+        else:
+            return JSONResponse({"success": False, "message": result}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"success": False, "message": str(e)}, status_code=500)
+
+
+@app.post("/api/mfa/decrypt")
+async def api_mfa_decrypt(file: UploadFile = File(...), code: str = Form(...)):
+    """Decrypts a file with the dynamic MFA vault master key."""
+    try:
+        file_path = _save_upload(file)
+        ok, result = mfa_vault.decrypt_with_vault(file_path, code)
+        
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            
+        if ok:
+            return FileResponse(result, filename=os.path.basename(result),
+                                media_type="application/octet-stream")
+        else:
+            return JSONResponse({"success": False, "message": result}, status_code=400)
+    except Exception as e:
+        return JSONResponse({"success": False, "message": str(e)}, status_code=500)
+
+
+# ─── Classical Ciphers Endpoints ───────────────────────────────────────────────
+
+@app.post("/api/classical/caesar/encrypt")
+async def api_caesar_encrypt(text: str = Form(...), shift: int = Form(...)):
+    res = ciphers.caesar_encrypt(text, shift)
+    return JSONResponse({"result": res})
+
+
+@app.post("/api/classical/caesar/decrypt")
+async def api_caesar_decrypt(text: str = Form(...), shift: int = Form(...)):
+    res = ciphers.caesar_decrypt(text, shift)
+    return JSONResponse({"result": res})
+
+
+@app.post("/api/classical/caesar/brute-force")
+async def api_caesar_brute_force(text: str = Form(...)):
+    res = ciphers.caesar_brute_force(text)
+    return JSONResponse({"results": res})
+
+
+@app.post("/api/classical/vigenere/encrypt")
+async def api_vigenere_encrypt(text: str = Form(...), key: str = Form(...)):
+    res = ciphers.vigenere_encrypt(text, key)
+    if res.startswith("Error"):
+        return JSONResponse({"success": False, "message": res}, status_code=400)
+    return JSONResponse({"success": True, "result": res})
+
+
+@app.post("/api/classical/vigenere/decrypt")
+async def api_vigenere_decrypt(text: str = Form(...), key: str = Form(...)):
+    res = ciphers.vigenere_decrypt(text, key)
+    if res.startswith("Error"):
+        return JSONResponse({"success": False, "message": res}, status_code=400)
+    return JSONResponse({"success": True, "result": res})

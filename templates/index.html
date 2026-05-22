@@ -1,362 +1,609 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hybrid Shield — Secure File Encryption System</title>
-    <meta name="description" content="A professional cryptographic suite using RSA-2048 and AES-256-GCM hybrid encryption.">
+    <meta name="description"
+        content="A professional cryptographic suite using RSA-2048 and AES-256-GCM hybrid encryption.">
     <link rel="stylesheet" href="/static/css/style.css?v=2">
 </head>
+
 <body>
-<div class="app">
+    <div class="app">
 
-    <!-- ═══ SIDEBAR ═══ -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <span class="logo-icon">⬡</span>
-            <div class="logo-text">
-                <h1>HYBRID</h1>
-                <span>SHIELD v3.0</span>
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <span class="logo-icon">⬡</span>
+                <div class="logo-text">
+                    <h1>HYBRID</h1>
+                    <span>SHIELD v3.0</span>
+                </div>
             </div>
-        </div>
-        <nav class="sidebar-nav">
-            <div class="nav-item active" data-tab="hybrid">
-                <span class="nav-icon">☯</span><span>Hybrid Crypto</span>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-tab="hybrid">
+                    <span class="nav-icon">☯</span><span>Hybrid Crypto</span>
+                </div>
+                <div class="nav-item" data-tab="signatures">
+                    <span class="nav-icon">✍</span><span>Signatures</span>
+                </div>
+                <div class="nav-item" data-tab="keys">
+                    <span class="nav-icon">🔑</span><span>Key Manager</span>
+                </div>
+                <div class="nav-item" data-tab="hashing">
+                    <span class="nav-icon">⬢</span><span>Hashing</span>
+                </div>
+                <div class="nav-item" data-tab="aes">
+                    <span class="nav-icon">⬡</span><span>AES Encryption</span>
+                </div>
+                <div class="nav-item" data-tab="mfa">
+                    <span class="nav-icon">🛡️</span><span>MFA Vault</span>
+                </div>
+                <div class="nav-item" data-tab="classical">
+                    <span class="nav-icon">📜</span><span>Classical Lab</span>
+                </div>
+                <div class="nav-item" data-tab="about">
+                    <span class="nav-icon">◎</span><span>About</span>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="badge">IS Final Project — 2026</div>
             </div>
-            <div class="nav-item" data-tab="signatures">
-                <span class="nav-icon">✍</span><span>Signatures</span>
-            </div>
-            <div class="nav-item" data-tab="keys">
-                <span class="nav-icon">🔑</span><span>Key Manager</span>
-            </div>
-            <div class="nav-item" data-tab="hashing">
-                <span class="nav-icon">⬢</span><span>Hashing</span>
-            </div>
-            <div class="nav-item" data-tab="aes">
-                <span class="nav-icon">⬡</span><span>AES Encryption</span>
-            </div>
-            <div class="nav-item" data-tab="about">
-                <span class="nav-icon">◎</span><span>About</span>
-            </div>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="badge">IS Final Project — 2025</div>
-        </div>
-    </aside>
+        </aside>
 
-    <!-- ═══ MAIN ═══ -->
-    <main class="main-content">
-        <div class="chrome-bar">
-            <div><span class="status-dot"></span>HYBRID SHIELD — Secure Cryptography Portal</div>
-            <div>RSA-2048 · AES-256-GCM · SHA-256 · RSA-PSS</div>
-        </div>
-        <div class="content-area">
+        <!-- ═══ MAIN ═══ -->
+        <main class="main-content">
+            <div class="chrome-bar">
+                <div><span class="status-dot"></span>HYBRID SHIELD — Secure Cryptography Portal</div>
+                <div>RSA-2048 · AES-256-GCM · SHA-256 · RSA-PSS</div>
+            </div>
+            <div class="content-area">
 
-<!-- ═══════════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════════
      TAB: HYBRID CRYPTOGRAPHY
      ═══════════════════════════════════════════════════════════════ -->
-<div id="tab-hybrid" class="tab-panel active">
-    <div class="section-header">
-        <span class="icon">☯</span>
-        <div>
-            <h2>Hybrid Cryptography</h2>
-            <p>RSA-2048 (Asymmetric) + AES-256-GCM (Symmetric) — Industry-standard secure file encryption</p>
-        </div>
-    </div>
+                <div id="tab-hybrid" class="tab-panel active">
+                    <div class="section-header">
+                        <span class="icon">☯</span>
+                        <div>
+                            <h2>Hybrid Cryptography</h2>
+                            <p>RSA-2048 (Asymmetric) + AES-256-GCM (Symmetric) — Industry-standard secure file
+                                encryption</p>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar"></div>1. Select Key Pair</div>
-        <div class="card-body">
-            <div class="form-group">
-                <label>Key (Public key encrypts, Private key decrypts)</label>
-                <select id="hyb-key" class="input-field key-select"></select>
-            </div>
-        </div>
-    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar"></div>1. Select Key Pair
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Key (Public key encrypts, Private key decrypts)</label>
+                                <select id="hyb-key" class="input-field key-select"></select>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--cyan)"></div>2. Select File</div>
-        <div class="card-body">
-            <div class="file-drop">
-                <div class="drop-icon">📁</div>
-                <div class="drop-text">Drag & drop a file here, or click to browse</div>
-                <div class="drop-hint">Any file type — documents, images, videos, archives</div>
-                <div class="file-name"></div>
-                <input type="file" id="hyb-file">
-            </div>
-        </div>
-    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--cyan)"></div>2. Select File
+                        </div>
+                        <div class="card-body">
+                            <div class="file-drop">
+                                <div class="drop-icon">📁</div>
+                                <div class="drop-text">Drag & drop a file here, or click to browse</div>
+                                <div class="drop-hint">Any file type — documents, images, videos, archives</div>
+                                <div class="file-name"></div>
+                                <input type="file" id="hyb-file">
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--accent2)"></div>3. Action</div>
-        <div class="card-body">
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="hybridEncrypt()">🔒 Hybrid Encrypt</button>
-                <button class="btn btn-secondary" onclick="hybridDecrypt()">🔓 Hybrid Decrypt</button>
-            </div>
-        </div>
-    </div>
-    <div id="hyb-status" class="status-bar"></div>
-</div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--accent2)"></div>3. Action
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group">
+                                <button class="btn btn-primary" onclick="hybridEncrypt()">🔒 Hybrid Encrypt</button>
+                                <button class="btn btn-secondary" onclick="hybridDecrypt()">🔓 Hybrid Decrypt</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="hyb-status" class="status-bar"></div>
+                </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════════
      TAB: DIGITAL SIGNATURES
      ═══════════════════════════════════════════════════════════════ -->
-<div id="tab-signatures" class="tab-panel">
-    <div class="section-header">
-        <span class="icon">✍</span>
-        <div>
-            <h2>Digital Signatures</h2>
-            <p>RSA-PSS with SHA-256 — Prove authenticity and non-repudiation</p>
-        </div>
-    </div>
+                <div id="tab-signatures" class="tab-panel">
+                    <div class="section-header">
+                        <span class="icon">✍</span>
+                        <div>
+                            <h2>Digital Signatures</h2>
+                            <p>RSA-PSS with SHA-256 — Prove authenticity and non-repudiation</p>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar"></div>Select Key</div>
-        <div class="card-body">
-            <div class="form-group">
-                <label>Key (Private key signs, Public key verifies)</label>
-                <select id="sig-key" class="input-field key-select"></select>
-            </div>
-        </div>
-    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar"></div>Select Key
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Key (Private key signs, Public key verifies)</label>
+                                <select id="sig-key" class="input-field key-select"></select>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--success)"></div>Sign a File</div>
-        <div class="card-body">
-            <div class="file-drop" style="margin-bottom:16px">
-                <div class="drop-icon">📄</div>
-                <div class="drop-text">Select the file you want to sign</div>
-                <div class="file-name"></div>
-                <input type="file" id="sig-file">
-            </div>
-            <button class="btn btn-success" onclick="signFile()">✍ Sign File</button>
-        </div>
-    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--success)"></div>Sign a File
+                        </div>
+                        <div class="card-body">
+                            <div class="file-drop" style="margin-bottom:16px">
+                                <div class="drop-icon">📄</div>
+                                <div class="drop-text">Select the file you want to sign</div>
+                                <div class="file-name"></div>
+                                <input type="file" id="sig-file">
+                            </div>
+                            <button class="btn btn-success" onclick="signFile()">✍ Sign File</button>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--cyan)"></div>Verify a Signature</div>
-        <div class="card-body">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-                <div class="file-drop">
-                    <div class="drop-icon">📄</div>
-                    <div class="drop-text">Original File</div>
-                    <div class="file-name"></div>
-                    <input type="file" id="verify-file">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--cyan)"></div>Verify a Signature
+                        </div>
+                        <div class="card-body">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                                <div class="file-drop">
+                                    <div class="drop-icon">📄</div>
+                                    <div class="drop-text">Original File</div>
+                                    <div class="file-name"></div>
+                                    <input type="file" id="verify-file">
+                                </div>
+                                <div class="file-drop">
+                                    <div class="drop-icon">🔏</div>
+                                    <div class="drop-text">.sig Signature File</div>
+                                    <div class="file-name"></div>
+                                    <input type="file" id="verify-sig">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="verifySignature()">✅ Verify Signature</button>
+                        </div>
+                    </div>
+                    <div id="sig-status" class="status-bar"></div>
                 </div>
-                <div class="file-drop">
-                    <div class="drop-icon">🔏</div>
-                    <div class="drop-text">.sig Signature File</div>
-                    <div class="file-name"></div>
-                    <input type="file" id="verify-sig">
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="verifySignature()">✅ Verify Signature</button>
-        </div>
-    </div>
-    <div id="sig-status" class="status-bar"></div>
-</div>
 
-<!-- ═══════════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════════
      TAB: KEY MANAGER
      ═══════════════════════════════════════════════════════════════ -->
-<div id="tab-keys" class="tab-panel">
-    <div class="section-header">
-        <span class="icon">🔑</span>
-        <div>
-            <h2>Key Manager</h2>
-            <p>Central registry for all RSA cryptographic key pairs</p>
-        </div>
-    </div>
+                <div id="tab-keys" class="tab-panel">
+                    <div class="section-header">
+                        <span class="icon">🔑</span>
+                        <div>
+                            <h2>Key Manager</h2>
+                            <p>Central registry for all RSA cryptographic key pairs</p>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--success)"></div>Generate New Key Pair</div>
-        <div class="card-body" style="display:flex;gap:12px;align-items:flex-end">
-            <div class="form-group" style="flex:1;margin:0">
-                <label>Key Label</label>
-                <input type="text" id="key-label" class="input-field" placeholder="e.g. My Project Key">
-            </div>
-            <button class="btn btn-success" onclick="generateKey()">➕ Generate RSA-2048</button>
-        </div>
-    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--success)"></div>Generate New Key Pair
+                        </div>
+                        <div class="card-body" style="display:flex;gap:12px;align-items:flex-end">
+                            <div class="form-group" style="flex:1;margin:0">
+                                <label>Key Label</label>
+                                <input type="text" id="key-label" class="input-field" placeholder="e.g. My Project Key">
+                            </div>
+                            <button class="btn btn-success" onclick="generateKey()">➕ Generate RSA-2048</button>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--cyan)"></div>Registered Keys</div>
-        <div class="card-body" style="padding:0">
-            <table class="key-table">
-                <thead><tr>
-                    <th>ID</th><th>Label</th><th>Algorithm</th><th>Bits</th><th>Created</th><th>Actions</th>
-                </tr></thead>
-                <tbody id="key-table-body"></tbody>
-            </table>
-        </div>
-    </div>
-    <div id="key-status" class="status-bar"></div>
-</div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--cyan)"></div>Registered Keys
+                        </div>
+                        <div class="card-body" style="padding:0">
+                            <table class="key-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Label</th>
+                                        <th>Algorithm</th>
+                                        <th>Bits</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="key-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="key-status" class="status-bar"></div>
+                </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════════
      TAB: HASHING
      ═══════════════════════════════════════════════════════════════ -->
-<div id="tab-hashing" class="tab-panel">
-    <div class="section-header">
-        <span class="icon">⬢</span>
-        <div>
-            <h2>Cryptographic Hashing</h2>
-            <p>One-way hash functions — SHA-256 & MD5</p>
-        </div>
-    </div>
+                <div id="tab-hashing" class="tab-panel">
+                    <div class="section-header">
+                        <span class="icon">⬢</span>
+                        <div>
+                            <h2>Cryptographic Hashing</h2>
+                            <p>One-way hash functions — SHA-256 & MD5</p>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar"></div>Hash Text</div>
-        <div class="card-body">
-            <div class="form-group">
-                <label>Input Text</label>
-                <textarea id="hash-input" class="input-field" placeholder="Enter text to hash..."></textarea>
-            </div>
-            <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:16px">
-                <div class="form-group" style="margin:0">
-                    <label>Algorithm</label>
-                    <select id="hash-algo" class="input-field" style="width:180px">
-                        <option value="sha256">SHA-256 (Recommended)</option>
-                        <option value="md5">MD5 (Legacy)</option>
-                    </select>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar"></div>Hash Text
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Input Text</label>
+                                <textarea id="hash-input" class="input-field"
+                                    placeholder="Enter text to hash..."></textarea>
+                            </div>
+                            <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:16px">
+                                <div class="form-group" style="margin:0">
+                                    <label>Algorithm</label>
+                                    <select id="hash-algo" class="input-field" style="width:180px">
+                                        <option value="sha256">SHA-256 (Recommended)</option>
+                                        <option value="md5">MD5 (Legacy)</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="hashText()">⬢ Hash Text</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--accent2)"></div>Hash File (SHA-256)
+                        </div>
+                        <div class="card-body">
+                            <div class="file-drop" style="margin-bottom:16px">
+                                <div class="drop-icon">📁</div>
+                                <div class="drop-text">Select a file to compute its SHA-256 hash</div>
+                                <div class="file-name"></div>
+                                <input type="file" id="hash-file">
+                            </div>
+                            <button class="btn btn-primary" onclick="hashFile()">⬢ Hash File</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--cyan)"></div>Hash Output
+                        </div>
+                        <div class="card-body">
+                            <div id="hash-output" class="hash-output">Hash will appear here...</div>
+                            <div style="margin-top:12px;text-align:right">
+                                <button class="btn btn-secondary" onclick="copyHash()">📋 Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="hash-status" class="status-bar"></div>
                 </div>
-                <button class="btn btn-primary" onclick="hashText()">⬢ Hash Text</button>
-            </div>
-        </div>
-    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--accent2)"></div>Hash File (SHA-256)</div>
-        <div class="card-body">
-            <div class="file-drop" style="margin-bottom:16px">
-                <div class="drop-icon">📁</div>
-                <div class="drop-text">Select a file to compute its SHA-256 hash</div>
-                <div class="file-name"></div>
-                <input type="file" id="hash-file">
-            </div>
-            <button class="btn btn-primary" onclick="hashFile()">⬢ Hash File</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--cyan)"></div>Hash Output</div>
-        <div class="card-body">
-            <div id="hash-output" class="hash-output">Hash will appear here...</div>
-            <div style="margin-top:12px;text-align:right">
-                <button class="btn btn-secondary" onclick="copyHash()">📋 Copy</button>
-            </div>
-        </div>
-    </div>
-    <div id="hash-status" class="status-bar"></div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════════
      TAB: AES SYMMETRIC
      ═══════════════════════════════════════════════════════════════ -->
-<div id="tab-aes" class="tab-panel">
-    <div class="section-header">
-        <span class="icon">⬡</span>
-        <div>
-            <h2>AES-256 Symmetric Encryption</h2>
-            <p>Password-based encryption using PBKDF2HMAC key derivation</p>
-        </div>
-    </div>
+                <div id="tab-aes" class="tab-panel">
+                    <div class="section-header">
+                        <span class="icon">⬡</span>
+                        <div>
+                            <h2>AES-256 Symmetric Encryption</h2>
+                            <p>Password-based encryption using PBKDF2HMAC key derivation</p>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar"></div>Select File</div>
-        <div class="card-body">
-            <div class="file-drop">
-                <div class="drop-icon">📁</div>
-                <div class="drop-text">Drag & drop or click to select</div>
-                <div class="file-name"></div>
-                <input type="file" id="aes-file">
-            </div>
-        </div>
-    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar"></div>Select File
+                        </div>
+                        <div class="card-body">
+                            <div class="file-drop">
+                                <div class="drop-icon">📁</div>
+                                <div class="drop-text">Drag & drop or click to select</div>
+                                <div class="file-name"></div>
+                                <input type="file" id="aes-file">
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--accent2)"></div>Password</div>
-        <div class="card-body">
-            <div class="form-group">
-                <label>Encryption / Decryption Password</label>
-                <input type="password" id="aes-password" class="input-field" placeholder="Enter a strong password...">
-            </div>
-        </div>
-    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--accent2)"></div>Password & Dynamic Strength Evaluator
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label>Encryption / Decryption Password</label>
+                                <input type="password" id="aes-password" class="input-field"
+                                    placeholder="Enter a strong password..." oninput="evaluatePasswordStrength()">
+                            </div>
+                            
+                            <!-- Dynamic Password Strength Checker UI -->
+                            <div id="password-strength-container" style="background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-top: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-size: 11px; color: var(--fg2); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Security Strength Rating:</span>
+                                    <span id="strength-badge" style="font-size: 11px; font-weight: 700; color: #888888; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.05);">No Password</span>
+                                </div>
+                                
+                                <!-- Progress Bar Indicator -->
+                                <div style="height: 6px; background: var(--entry-bg); border-radius: 3px; overflow: hidden; margin-bottom: 16px; display: flex; gap: 4px;">
+                                    <div id="strength-segment-1" style="flex:1; height:100%; background: #222; border-radius: 2px; transition: background 0.3s;"></div>
+                                    <div id="strength-segment-2" style="flex:1; height:100%; background: #222; border-radius: 2px; transition: background 0.3s;"></div>
+                                    <div id="strength-segment-3" style="flex:1; height:100%; background: #222; border-radius: 2px; transition: background 0.3s;"></div>
+                                    <div id="strength-segment-4" style="flex:1; height:100%; background: #222; border-radius: 2px; transition: background 0.3s;"></div>
+                                    <div id="strength-segment-5" style="flex:1; height:100%; background: #222; border-radius: 2px; transition: background 0.3s;"></div>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; margin-bottom: 12px;">
+                                    <div id="chk-len-8" class="chk-item" style="color: var(--fg2); display: flex; align-items: center; gap: 6px;">❌ At least 8 characters</div>
+                                    <div id="chk-len-12" class="chk-item" style="color: var(--fg2); display: flex; align-items: center; gap: 6px;">❌ At least 12 characters</div>
+                                    <div id="chk-cases" class="chk-item" style="color: var(--fg2); display: flex; align-items: center; gap: 6px;">❌ Upper & Lowercase</div>
+                                    <div id="chk-digits" class="chk-item" style="color: var(--fg2); display: flex; align-items: center; gap: 6px;">❌ At least 1 number</div>
+                                    <div id="chk-symbols" class="chk-item" style="color: var(--fg2); display: flex; align-items: center; gap: 6px;">❌ At least 1 symbol</div>
+                                </div>
+                                
+                                <div style="border-top: 1px solid var(--border); padding-top: 10px; font-size: 11px;">
+                                    <div style="font-weight: 600; color: var(--fg2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Improvement Guidelines:</div>
+                                    <ul id="strength-tips" style="list-style-type: none; padding-left: 0; color: var(--fg2); display: flex; flex-direction: column; gap: 4px; line-height: 1.4;">
+                                        <li>• Enter a password to check its strength.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="card">
-        <div class="card-header"><div class="accent-bar" style="background:var(--cyan)"></div>Actions</div>
-        <div class="card-body">
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="aesEncrypt()">🔒 Encrypt</button>
-                <button class="btn btn-secondary" onclick="aesDecrypt()">🔓 Decrypt</button>
-            </div>
-        </div>
-    </div>
-    <div id="aes-status" class="status-bar"></div>
-</div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--cyan)"></div>Actions
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group">
+                                <button class="btn btn-primary" onclick="aesEncrypt()">🔒 Encrypt</button>
+                                <button class="btn btn-secondary" onclick="aesDecrypt()">🔓 Decrypt</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="aes-status" class="status-bar"></div>
+                </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════════
+     TAB: MFA VAULT
+     ═══════════════════════════════════════════════════════════════ -->
+                <div id="tab-mfa" class="tab-panel">
+                    <div class="section-header">
+                        <span class="icon">🛡️</span>
+                        <div>
+                            <h2>Multi-Factor Authentication Vault</h2>
+                            <p>Lock and unlock sensitive files with dynamic OTP codes generated by Google Authenticator.</p>
+                        </div>
+                    </div>
+
+                    <!-- Setup Vault Card -->
+                    <div class="card" id="mfa-setup-card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--success)"></div>1. Configure Vault Security
+                        </div>
+                        <div class="card-body">
+                            <div id="mfa-unconfigured-view">
+                                <p style="margin-bottom: 16px; font-size: 13px; color: var(--fg2);">
+                                    Your secure vault is currently unconfigured. Generate an MFA secret seed, link it to your Google Authenticator or Microsoft Authenticator app by scanning the QR code, and verify it to activate the vault.
+                                </p>
+                                <div class="form-group">
+                                    <label>Vault Username / Label</label>
+                                    <input type="text" id="mfa-username" class="input-field" value="CipherShield User" placeholder="e.g. User">
+                                </div>
+                                <button class="btn btn-primary" onclick="generateMFA()">🔑 Generate MFA Seed & QR</button>
+                                
+                                <div id="mfa-qr-container" style="display:none; margin-top:20px; text-align:center; padding: 20px; background: var(--panel2); border-radius: var(--radius); border: 1px solid var(--border);">
+                                    <div style="font-size:12px; color:var(--cyan); font-weight:600; margin-bottom:12px;">SCAN THIS QR CODE IN YOUR AUTHENTICATOR APP:</div>
+                                    <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                                        <img id="mfa-qr-image" style="background:#fff; padding:10px; border-radius:8px; display: block; box-shadow:0 4px 15px rgba(0,0,0,0.5);" alt="MFA QR Code">
+                                    </div>
+                                    <div style="font-size:11px; color:var(--fg2); font-family:'JetBrains Mono', monospace; word-break:break-all; margin-bottom:16px;">
+                                        Secret Seed: <span id="mfa-seed-text" style="color:var(--warn); font-weight:bold;"></span>
+                                    </div>
+                                    <div class="form-group" style="max-width:300px; margin: 0 auto 16px;">
+                                        <label>6-Digit Authenticator OTP Code</label>
+                                        <input type="text" id="mfa-setup-code" class="input-field" style="text-align:center; font-size:18px; letter-spacing:4px;" placeholder="000000" maxlength="6">
+                                    </div>
+                                    <button class="btn btn-success" onclick="setupVault()">🛡️ Verify & Activate Vault</button>
+                                </div>
+                            </div>
+                            
+                            <div id="mfa-configured-view" style="display:none; text-align:center; padding: 10px 0;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">🛡️</div>
+                                <h3 style="color: var(--success); margin-bottom: 8px;">MFA Vault is Active & Secure</h3>
+                                <p style="font-size: 13px; color: var(--fg2); margin-bottom: 16px;">
+                                    The vault is locked with your Google Authenticator key. You can now encrypt and decrypt files using your dynamic OTP code.
+                                </p>
+                                <button class="btn btn-danger" style="font-size: 11px; padding: 6px 12px;" onclick="resetMFA()">⚠️ Reset Vault Security</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vault Operations Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--accent2)"></div>2. Vault Cryptographic Operations
+                        </div>
+                        <div class="card-body">
+                            <div class="file-drop" style="margin-bottom: 16px;">
+                                <div class="drop-icon">📂</div>
+                                <div class="drop-text">Drag & drop a file here, or click to select</div>
+                                <div class="file-name" id="mfa-file-name"></div>
+                                <input type="file" id="mfa-file">
+                            </div>
+                            <div class="form-group" style="max-width: 300px;">
+                                <label>Enter Current Google Authenticator OTP</label>
+                                <input type="text" id="mfa-op-code" class="input-field" style="text-align:center; font-size:18px; letter-spacing:4px;" placeholder="000000" maxlength="6">
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-primary" onclick="mfaEncrypt()">🔒 Encrypt File into Vault</button>
+                                <button class="btn btn-secondary" onclick="mfaDecrypt()">🔓 Decrypt File from Vault</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="mfa-status" class="status-bar"></div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+     TAB: CLASSICAL CIPHERS LAB
+     ═══════════════════════════════════════════════════════════════ -->
+                <div id="tab-classical" class="tab-panel">
+                    <div class="section-header">
+                        <span class="icon">📜</span>
+                        <div>
+                            <h2>Classical Ciphers Lab</h2>
+                            <p>Explore pre-computer historical cryptography ciphers. Educational models only — not secure for modern data!</p>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        
+                        <!-- Caesar Cipher Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="accent-bar"></div>Caesar Shift Cipher (c. 58 BC)
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Caesar Input Text</label>
+                                    <textarea id="caesar-text" class="input-field" style="min-height: 80px;" placeholder="Enter text to encrypt or decrypt..."></textarea>
+                                </div>
+                                <div class="form-group" style="max-width: 150px;">
+                                    <label>Shift Value (0 - 25)</label>
+                                    <input type="number" id="caesar-shift" class="input-field" value="3" min="0" max="25">
+                                </div>
+                                <div class="btn-group" style="margin-bottom: 16px;">
+                                    <button class="btn btn-primary" onclick="caesarEncrypt()">🔒 Encrypt</button>
+                                    <button class="btn btn-secondary" onclick="caesarDecrypt()">🔓 Decrypt</button>
+                                </div>
+                                <button class="btn btn-danger" style="width: 100%;" onclick="caesarBruteForce()">💥 Visual Brute-Force Crack</button>
+                            </div>
+                        </div>
+
+                        <!-- Vigenère Cipher Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="accent-bar" style="background:var(--cyan)"></div>Vigenère Keyword Cipher (c. 1553)
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Vigenère Input Text</label>
+                                    <textarea id="vigenere-text" class="input-field" style="min-height: 80px;" placeholder="Enter text to encrypt or decrypt..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Keyword (Letters only)</label>
+                                    <input type="text" id="vigenere-key" class="input-field" placeholder="e.g. LEMON">
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary" onclick="vigenereEncrypt()">🔒 Encrypt</button>
+                                    <button class="btn btn-secondary" onclick="vigenereDecrypt()">🔓 Decrypt</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Output & Cracker Card -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <div class="accent-bar" style="background:var(--success)"></div>Lab Terminal Output & Brute-Force Console
+                        </div>
+                        <div class="card-body">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <span style="font-size:11px; color:var(--fg2); text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Ciphertext / Decryption Result:</span>
+                                <button class="btn btn-secondary" style="padding:4px 10px; font-size:11px;" onclick="copyClassicalOutput()">📋 Copy Output</button>
+                            </div>
+                            <div id="classical-output" class="hash-output" style="min-height:60px; font-family:'JetBrains Mono', monospace;">Output results will appear here...</div>
+                            
+                            <div id="brute-force-box" style="display:none; margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+                                <span style="display:block; font-size:11px; color:var(--warn); text-transform:uppercase; letter-spacing:0.5px; font-weight:600; margin-bottom:10px;">Brute-Force Attack Vectors (All 25 Shift Combinations):</span>
+                                <div id="brute-force-results" style="background:var(--entry-bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; font-family:'JetBrains Mono', monospace; font-size:12px; max-height:220px; overflow-y:auto; color:var(--fg2); line-height:1.6;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="classical-status" class="status-bar"></div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
      TAB: ABOUT
      ═══════════════════════════════════════════════════════════════ -->
-<div id="tab-about" class="tab-panel">
-    <div class="section-header">
-        <span class="icon">◎</span>
-        <div>
-            <h2>About Hybrid Shield</h2>
-            <p>A Secure File Encryption System using Hybrid Cryptography</p>
-        </div>
-    </div>
+                <div id="tab-about" class="tab-panel">
+                    <div class="section-header">
+                        <span class="icon">◎</span>
+                        <div>
+                            <h2>About Hybrid Shield</h2>
+                            <p>A Secure File Encryption System using Hybrid Cryptography</p>
+                        </div>
+                    </div>
 
-    <div class="about-grid">
-        <div class="about-card">
-            <div class="card-icon">☯</div>
-            <h3>Hybrid Cryptography</h3>
-            <p>Combines RSA-2048 (asymmetric) for secure key exchange with AES-256-GCM (symmetric) for fast, authenticated file encryption. This is the same approach used by HTTPS/TLS and PGP.</p>
-        </div>
-        <div class="about-card">
-            <div class="card-icon">✍</div>
-            <h3>Digital Signatures</h3>
-            <p>Uses RSA-PSS with SHA-256 to provide non-repudiation. A signer cannot deny having signed a file, and any modification to the signed file will invalidate the signature.</p>
-        </div>
-        <div class="about-card">
-            <div class="card-icon">🔑</div>
-            <h3>Key Management</h3>
-            <p>A local Key Management System (KMS) to generate, track, and manage RSA key pairs. Keys are stored as industry-standard PEM files (PKCS#8 format).</p>
-        </div>
-        <div class="about-card">
-            <div class="card-icon">⬢</div>
-            <h3>Cryptographic Hashing</h3>
-            <p>SHA-256 (256-bit, collision-resistant) for data integrity verification. MD5 (128-bit, broken) included for educational comparison only.</p>
-        </div>
-        <div class="about-card">
-            <div class="card-icon">⬡</div>
-            <h3>Symmetric Encryption</h3>
-            <p>AES-256 via Fernet with PBKDF2HMAC key derivation (50,000 iterations + random salt). Converts weak human passwords into strong cryptographic keys.</p>
-        </div>
-        <div class="about-card">
-            <div class="card-icon">🛡️</div>
-            <h3>Authenticated Encryption</h3>
-            <p>AES-GCM mode provides both confidentiality and integrity. A 128-bit authentication tag ensures that encrypted files cannot be tampered with undetected.</p>
-        </div>
-    </div>
+                    <div class="about-grid">
+                        <div class="about-card">
+                            <div class="card-icon">☯</div>
+                            <h3>Hybrid Cryptography</h3>
+                            <p>Combines RSA-2048 (asymmetric) for secure key exchange with AES-256-GCM (symmetric) for
+                                fast, authenticated file encryption. This is the same approach used by HTTPS/TLS and
+                                PGP.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="card-icon">✍</div>
+                            <h3>Digital Signatures</h3>
+                            <p>Uses RSA-PSS with SHA-256 to provide non-repudiation. A signer cannot deny having signed
+                                a file, and any modification to the signed file will invalidate the signature.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="card-icon">🔑</div>
+                            <h3>Key Management</h3>
+                            <p>A local Key Management System (KMS) to generate, track, and manage RSA key pairs. Keys
+                                are stored as industry-standard PEM files (PKCS#8 format).</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="card-icon">⬢</div>
+                            <h3>Cryptographic Hashing</h3>
+                            <p>SHA-256 (256-bit, collision-resistant) for data integrity verification. MD5 (128-bit,
+                                broken) included for educational comparison only.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="card-icon">⬡</div>
+                            <h3>Symmetric Encryption</h3>
+                            <p>AES-256 via Fernet with PBKDF2HMAC key derivation (50,000 iterations + random salt).
+                                Converts weak human passwords into strong cryptographic keys.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="card-icon">🛡️</div>
+                            <h3>Authenticated Encryption</h3>
+                            <p>AES-GCM mode provides both confidentiality and integrity. A 128-bit authentication tag
+                                ensures that encrypted files cannot be tampered with undetected.</p>
+                        </div>
+                    </div>
 
-    <div class="card" style="margin-top:24px">
-        <div class="card-body" style="text-align:center;padding:20px">
-            <p style="color:var(--fg2);font-size:12px">
-                Hybrid Shield v3.0 — Information Security Final Project<br>
-                Built with Python (FastAPI) + HTML/CSS/JS<br>
-                RSA-2048 · AES-256-GCM · SHA-256 · PBKDF2HMAC · RSA-PSS
-            </p>
-        </div>
-    </div>
-</div>
+                    <div class="card" style="margin-top:24px">
+                        <div class="card-body" style="text-align:center;padding:20px">
+                            <p style="color:var(--fg2);font-size:12px">
+                                Hybrid Shield v3.0 — Information Security Final Project<br>
+                                Built with Python (FastAPI) + HTML/CSS/JS<br>
+                                RSA-2048 · AES-256-GCM · SHA-256 · PBKDF2HMAC · RSA-PSS
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-        </div><!-- /content-area -->
-    </main>
-</div><!-- /app -->
+            </div><!-- /content-area -->
+        </main>
+    </div><!-- /app -->
 
-<script src="/static/js/main.js?v=4"></script>
+    <script src="/static/js/main.js?v=4"></script>
 </body>
+
 </html>
